@@ -35,3 +35,8 @@ article.essay .body p.lede{font-size:19px;color:var(--soft)}
 .about p strong{color:var(--ink);font-weight:normal}
 .about a{color:var(--accent)}
 footer{border-top:1px solid var(--line);padding:24px 0 60px;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:var(--faint)}
+.cta{border-top:1px solid var(--line);margin-top:44px;padding-top:28px}
+.cta p{font-size:15px;color:var(--soft);margin-bottom:14px}
+.cta .row{display:flex;flex-wrap:wrap;gap:10px}
+.cta a{font-family:Helvetica,Arial,sans-serif;font-size:13px;text-decoration:none;padding:8px 16px;border:1px solid var(--line);border-radius:4px;color:var(--ink);background:#fff}
+.cta a:hover{border-color:var(--ink)}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Lotan Levkowitz — Essays</title>
+<link>https://lotan.vc/</link>
+<description>Essays and field notes on enterprise AI, data moats, software infrastructure, and how companies get formed.</description>
+<language>en</language>
+<item>
+<title>Show Me the Flywheel</title>
+<link>https://lotan.vc/essays/show-me-the-flywheel.html</link>
+<guid>https://lotan.vc/essays/show-me-the-flywheel.html</guid>
+<pubDate>Wed, 08 Jul 2026 09:00:00 +0300</pubDate>
+<description>Proprietary data is a head start, not a moat. A moat is proprietary data that compounds. Five ways real companies built compounding datasets, and the one question to ask any AI company: does it compound.</description>
+</item>
+</channel></rss>
