@@ -67,3 +67,7 @@ h2.section{font-size:13px;font-family:Helvetica,Arial,sans-serif;letter-spacing:
 .cta a:hover{opacity:.82}
 .cta a.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
 footer{border-top:1px solid var(--line);margin-top:60px;padding:24px 0 60px;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:var(--faint)}
+.starthere{padding:16px 0;border-bottom:1px solid var(--line);font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:2}
+.starthere .sh-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-right:14px}
+.starthere a{color:var(--ink);text-decoration:none;margin-right:8px;padding:3px 10px;border:1px solid var(--line);border-radius:14px;white-space:nowrap;display:inline-block;margin-bottom:4px}
+.starthere a:hover{border-color:var(--ink)}
