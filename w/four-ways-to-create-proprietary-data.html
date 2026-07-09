@@ -71,7 +71,7 @@
 על זה – ועל עוד הרבה שאלות שחוזרות אצל יזמים שבונים AI אמיתי – כתבנו בפלייבוק.</div></details>
 <div class="prov">First published <a href="https://www.linkedin.com/feed/update/urn:li:activity:7343914100432760834/" rel="noopener">on LinkedIn</a>, 2025-06-26. Originally written in Hebrew; English version by the author.</div>
 </article>
-<aside class="rel"><h3>Keep reading</h3><div class="r"><a href="/w/five-ways-to-build-proprietary-data.html">Five ways to build proprietary data</a><div class="meta">Data Moats &middot; 2026-06-16</div></div><div class="r"><a href="/w/show-me-the-flywheel.html">Show me the flywheel</a><div class="meta">Data Moats &middot; 2026-06-09</div></div><div class="r"><a href="/w/the-enterprise-ai-startup-playbook.html">The Enterprise-AI Startup Playbook</a><div class="meta">Data Moats &middot; 2025-05-26</div></div><div class="r"><a href="/essays/show-me-the-flywheel.html">Show Me the Flywheel (essay)</a><div class="meta">Data Moats</div></div></aside>
+<aside class="rel"><h3>Keep reading</h3><div class="r"><a href="/w/five-ways-to-build-proprietary-data.html">Five ways to build proprietary data</a><div class="meta">Data Moats &middot; 2026-06-16</div></div><div class="r"><a href="/w/the-enterprise-ai-startup-playbook.html">The Enterprise-AI Startup Playbook</a><div class="meta">Data Moats &middot; 2025-05-26</div></div><div class="r"><a href="/w/the-ai-bubble-bursts-on-layer-economics.html">The AI bubble bursts on layer economics</a><div class="meta">AI Market Structure &middot; 2026-07-08</div></div><div class="r"><a href="/essays/show-me-the-flywheel.html">Show Me the Flywheel (essay)</a><div class="meta">Data Moats</div></div></aside>
 </div>
 <div class="cta" id="connect">
 <p>Everything I write lands here first. If something resonated:</p>
@@ -83,5 +83,18 @@
 </div>
 <footer>Lotan Levkowitz &middot; Grove Ventures &middot; <a href="/feed.xml" style="color:var(--faint)">RSS</a></footer>
 </div>
+<script>
+(function(){if(!document.querySelector('article.piece'))return;
+var slug=location.pathname.replace(/\.html$/,'').split('/').pop();
+var t=0,fired={},maxs=0;
+function ev(p){if(fired[p])return;fired[p]=1;if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:p,event:true});}
+setInterval(function(){if(!document.hidden){t+=5;
+if(t>=30)ev('read-30s-'+slug);
+if(t>=120)ev('read-2m-'+slug);}},5000);
+window.addEventListener('scroll',function(){var d=document.documentElement;
+var p=(window.scrollY+window.innerHeight)/d.scrollHeight;
+if(p>maxs)maxs=p;if(maxs>0.85)ev('read-done-'+slug);},{passive:true});
+})();
+</script>
 </body>
 </html>
