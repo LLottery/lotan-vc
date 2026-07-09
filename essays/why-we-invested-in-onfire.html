@@ -38,5 +38,18 @@
 </div>
 <footer>Lotan Levkowitz &middot; Grove Ventures &middot; <a href="/feed.xml" style="color:var(--faint)">RSS</a></footer>
 </div>
+<script>
+(function(){if(!document.querySelector('article.piece'))return;
+var slug=location.pathname.replace(/\.html$/,'').split('/').pop();
+var t=0,fired={},maxs=0;
+function ev(p){if(fired[p])return;fired[p]=1;if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:p,event:true});}
+setInterval(function(){if(!document.hidden){t+=5;
+if(t>=30)ev('read-30s-'+slug);
+if(t>=120)ev('read-2m-'+slug);}},5000);
+window.addEventListener('scroll',function(){var d=document.documentElement;
+var p=(window.scrollY+window.innerHeight)/d.scrollHeight;
+if(p>maxs)maxs=p;if(maxs>0.85)ev('read-done-'+slug);},{passive:true});
+})();
+</script>
 </body>
 </html>
