@@ -1,0 +1,46 @@
+name: Deploy site to GitHub Pages
+
+# The legacy branch-based Pages builder stopped publishing this repo: its runs
+# sit in `queued` forever and every URL returns "Site not found". Deploying
+# through Actions re-creates the Pages site (configure-pages `enablement`) and
+# publishes the repo root, which is already a complete static site.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it midway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Pages (creates the site if it does not exist)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # Uploads the repo root. .git and .github are excluded by the action;
+      # CNAME ships with the artifact so the custom domain is applied.
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
