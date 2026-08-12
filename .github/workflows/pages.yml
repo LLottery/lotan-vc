@@ -1,9 +1,12 @@
-name: Deploy site to GitHub Pages
+name: Publish site
 
-# The legacy branch-based Pages builder stopped publishing this repo: its runs
-# sit in `queued` forever and every URL returns "Site not found". Deploying
-# through Actions re-creates the Pages site (configure-pages `enablement`) and
-# publishes the repo root, which is already a complete static site.
+# The site is served by the legacy Pages builder from the `gh-pages` branch.
+#
+# Pushing that branch is what re-created the Pages site after it was deleted:
+# the Actions deployment path could not be used, because the workflow token is
+# not permitted to create a Pages site ("Resource not accessible by integration"
+# from actions/configure-pages). Publishing therefore means getting `main` onto
+# `gh-pages`, which this workflow does on every push so the two never drift.
 
 on:
   push:
@@ -11,36 +14,19 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Let a running deploy finish rather than cancelling it midway.
 concurrency:
-  group: pages
+  group: publish
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Configure Pages (creates the site if it does not exist)
-        uses: actions/configure-pages@v5
         with:
-          enablement: true
+          fetch-depth: 0
 
-      # Uploads the repo root. .git and .github are excluded by the action;
-      # CNAME ships with the artifact so the custom domain is applied.
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Mirror main onto gh-pages
+        run: git push --force origin HEAD:gh-pages
