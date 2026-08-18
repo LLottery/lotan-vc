@@ -73,11 +73,43 @@ That flag matters. The site credits English versions to the author, so a
 translated post must not be published under that line until Lotan writes or
 approves the English himself. Never set the flag to false for text you produced.
 
-**5. Images**
+**5. Visuals — capture every one**
 
-Download each post's main image to `linkedin-export/<activity_id>.jpg`. Skip
-video thumbnails and link-preview images — only images I attached. If a post has
-no image, omit the `image` field entirely.
+Many posts carry more than one visual. Save them all into `linkedin-export/`,
+named `<activity_id>.jpg`, `<activity_id>-2.jpg`, `<activity_id>-3.jpg`, and so
+on, in the order they appear in the post. Download at the largest resolution
+LinkedIn serves, not the feed thumbnail.
+
+Cover each of these:
+
+- Single images and multi-image posts — every image, not just the first.
+- Diagrams, charts, and frameworks. These matter most; they are usually the
+  point of the post.
+- Document/carousel posts (PDF decks). Export every slide as its own image,
+  in order.
+- Videos — save the poster frame and note in your report that the post has a
+  video the site will not carry.
+
+Skip link-preview thumbnails, profile photos, company logos, and reaction icons.
+
+Then record them in the JSON. The first visual is the hero; the rest become
+figures:
+
+    "image": "linkedin-export/<id>.jpg",
+    "figures": [
+      {"file": "linkedin-export/<id>-2.jpg",
+       "caption": "Short caption, or omit if the image speaks for itself",
+       "after_paragraph": 3},
+      "linkedin-export/<id>-3.jpg"
+    ]
+
+`after_paragraph` places a figure directly under that paragraph, counting from
+1. Use it when the post text clearly refers to the visual at a particular point
+— a diagram introduced mid-argument, a slide that illustrates one step. If the
+placement is not obvious, leave it out and the figure goes after the body. A
+bare path string is fine when there is no caption and no placement.
+
+If a post has no visuals, omit both fields.
 
 **6. Report back**
 

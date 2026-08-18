@@ -151,7 +151,29 @@ def build_related(cards, theme, self_url):
 
 
 def build_page(p, related):
-    paras = "".join(f"<p>{esc(x)}</p>" for x in p["body_en"])
+    def figure_html(f):
+        cap = f'<figcaption>{esc(f["caption"])}</figcaption>' if f["caption"] else ""
+        return (
+            f'<figure><img src="/img/{f["name"]}" alt="{esc(f["caption"])}" '
+            f'loading="lazy">{cap}</figure>'
+        )
+
+    # A figure with after_paragraph lands under that paragraph; the rest follow
+    # the body in the order given.
+    after, trailing = {}, []
+    for f in p.get("figures") or []:
+        n = f.get("after")
+        if isinstance(n, int) and 1 <= n <= len(p["body_en"]):
+            after.setdefault(n, []).append(f)
+        else:
+            trailing.append(f)
+
+    chunks = []
+    for i, x in enumerate(p["body_en"], start=1):
+        chunks.append(f"<p>{esc(x)}</p>")
+        chunks.extend(figure_html(f) for f in after.get(i, []))
+    chunks.extend(figure_html(f) for f in trailing)
+    paras = "".join(chunks)
 
     hero = f'\n<img class="hero-img" src="/img/{p["image_name"]}" alt="">' if p.get("image_name") else ""
 
@@ -303,13 +325,37 @@ def load_post(path):
     if not p.get("excerpt"):
         p["excerpt"] = p["body_en"][0][:300]
 
+    aid = activity_id(p.get("linkedin_url", ""))
+    stem = aid or p["slug"]
+
     p["image_name"] = None
     src = p.get("image")
     if src:
-        aid = activity_id(p.get("linkedin_url", ""))
         ext = os.path.splitext(src)[1] or ".jpg"
-        p["image_name"] = f"{aid or p['slug']}{ext}"
+        p["image_name"] = f"{stem}{ext}"
         p["image_src"] = src
+
+    # Additional visuals. Accepts plain paths or
+    # {file, caption, after_paragraph}; numbering continues from the hero.
+    figures = []
+    for i, f in enumerate(p.get("figures") or [], start=2):
+        if isinstance(f, str):
+            f = {"file": f}
+        path = f.get("file")
+        if not path:
+            continue
+        if not os.path.exists(path):
+            sys.exit(f"error: figure not found: {path}")
+        ext = os.path.splitext(path)[1] or ".jpg"
+        figures.append(
+            {
+                "src": path,
+                "name": f"{stem}-{i}{ext}",
+                "caption": (f.get("caption") or "").strip(),
+                "after": f.get("after_paragraph"),
+            }
+        )
+    p["figures"] = figures
     return p
 
 
@@ -348,7 +394,12 @@ def main():
     print(f"  filters   All ({len(new_cards)})")
     print(f"  feed.xml  {'added' if feed_ok else 'already present'}")
     print(f"  sitemap   {'added' if sm_ok else 'already present'}")
+    figs = p.get("figures") or []
     print(f"  image     {p['image_name'] or 'none'}")
+    if figs:
+        for f in figs:
+            where = f"after para {f['after']}" if isinstance(f.get("after"), int) else "end of body"
+            print(f"  figure    {f['name']}  ({where})")
 
     if a.dry_run:
         print("\ndry run — nothing written")
@@ -356,6 +407,8 @@ def main():
 
     if p.get("image_name"):
         shutil.copyfile(p["image_src"], os.path.join(ROOT, "img", p["image_name"]))
+    for f in p.get("figures") or []:
+        shutil.copyfile(f["src"], os.path.join(ROOT, "img", f["name"]))
 
     write(page_path, page)
     write(os.path.join(ROOT, "index.html"), new_index)

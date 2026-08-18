@@ -55,6 +55,10 @@ of paragraph strings.
 5. Prepends an item to `feed.xml` and a URL to `sitemap.xml`.
 6. Copies the hero image into `img/`, named after the LinkedIn activity id to
    match the existing convention.
+7. Copies any additional visuals into `img/` as `<id>-2.jpg`, `<id>-3.jpg`, and
+   renders them as figures in the body. `after_paragraph` places one under a
+   given paragraph; the rest follow the text. Captions are optional and become
+   both the `<figcaption>` and the image's alt text.
 
 Counts are incremented rather than recomputed on purpose: the hand-maintained
 numbers exclude an externally-linked card, and a rebuild would rewrite figures
