@@ -47,7 +47,7 @@ posts, all matching.
       "excerpt":      "One or two sentences for the site card and RSS.",
       "body_en":      "Paragraph.\n\nParagraph.",
       "body_he":      "",
-      "image":        "linkedin-export/<id>.jpg",
+      "image":        "<id>.jpg",
       "language":     "en",
       "english_is_machine_translation": false
     }
@@ -95,12 +95,12 @@ Skip link-preview thumbnails, profile photos, company logos, and reaction icons.
 Then record them in the JSON. The first visual is the hero; the rest become
 figures:
 
-    "image": "linkedin-export/<id>.jpg",
+    "image": "<id>.jpg",
     "figures": [
-      {"file": "linkedin-export/<id>-2.jpg",
+      {"file": "<id>-2.jpg",
        "caption": "Short caption, or omit if the image speaks for itself",
        "after_paragraph": 3},
-      "linkedin-export/<id>-3.jpg"
+      "<id>-3.jpg"
     ]
 
 `after_paragraph` places a figure directly under that paragraph, counting from
@@ -111,7 +111,16 @@ bare path string is fine when there is no caption and no placement.
 
 If a post has no visuals, omit both fields.
 
-**6. Report back**
+**6. Zip the folder**
+
+Put every JSON file and every image directly in `linkedin-export/`, flat, with
+no subfolders. Asset paths in the JSON are bare filenames because the files sit
+beside it.
+
+Then zip the whole folder to `linkedin-export.zip` in my home directory, and
+tell me where it is so I can upload it.
+
+**7. Report back**
 
 Print a table of what you exported: date, title, theme, language, whether an
 image was saved. Then list anything you skipped and why, and flag any post where

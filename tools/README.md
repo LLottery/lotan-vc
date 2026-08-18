@@ -79,3 +79,21 @@ Post dates come from the activity id rather than LinkedIn's relative labels:
     timestamp_ms = activity_id >> 22
 
 Verified against 10 published posts, all exact.
+
+## Ingesting a whole export
+
+`ingest-zip.py` takes the zip the export prompt produces and runs every post in
+it through `ingest.py`, oldest first so the writing list ends up ordered:
+
+```bash
+python3 tools/ingest-zip.py linkedin-export.zip --dry-run
+python3 tools/ingest-zip.py linkedin-export.zip
+git add -A && git commit -m "Add posts" && git push
+```
+
+Asset paths in each JSON resolve against the JSON's own directory, so a flat
+bundle of posts and images works with bare filenames.
+
+Posts marked `"english_is_machine_translation": true` are held back rather than
+published, because the page template credits English versions to the author.
+Approve or rewrite the English, set the flag to false, and re-run.

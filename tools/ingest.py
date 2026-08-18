@@ -65,6 +65,18 @@ def activity_id(url):
     return m.group(1) if m else None
 
 
+def resolve(base, path):
+    """Resolve an asset path against the JSON file's own directory.
+
+    Falls back to the path as given, so both a bundle of files sitting next to
+    the JSON and an absolute path from elsewhere work.
+    """
+    if os.path.isabs(path):
+        return path
+    near = os.path.join(base, path)
+    return near if os.path.exists(near) else path
+
+
 def read(p):
     with open(p, encoding="utf-8") as f:
         return f.read()
@@ -308,6 +320,7 @@ def update_sitemap(xml, p):
 
 def load_post(path):
     p = json.load(open(path, encoding="utf-8"))
+    base = os.path.dirname(os.path.abspath(path))
 
     for k in ("title", "date", "theme", "body_en"):
         if not p.get(k):
@@ -331,6 +344,9 @@ def load_post(path):
     p["image_name"] = None
     src = p.get("image")
     if src:
+        src = resolve(base, src)
+        if not os.path.exists(src):
+            sys.exit(f"error: image not found: {p['image']}")
         ext = os.path.splitext(src)[1] or ".jpg"
         p["image_name"] = f"{stem}{ext}"
         p["image_src"] = src
@@ -341,11 +357,12 @@ def load_post(path):
     for i, f in enumerate(p.get("figures") or [], start=2):
         if isinstance(f, str):
             f = {"file": f}
-        path = f.get("file")
-        if not path:
+        raw = f.get("file")
+        if not raw:
             continue
+        path = resolve(base, raw)
         if not os.path.exists(path):
-            sys.exit(f"error: figure not found: {path}")
+            sys.exit(f"error: figure not found: {raw}")
         ext = os.path.splitext(path)[1] or ".jpg"
         figures.append(
             {
