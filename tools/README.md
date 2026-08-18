@@ -5,7 +5,7 @@
 ```bash
 python3 tools/ingest.py post.json --dry-run   # preview
 python3 tools/ingest.py post.json             # apply
-git add -A && git commit -m "Add post: <title>" && git push
+
 ```
 
 GitHub Pages redeploys about a minute after the push.
@@ -62,3 +62,16 @@ this script has no opinion about.
 
 The script refuses to overwrite an existing slug, and re-running it will not
 duplicate feed or sitemap entries.
+
+## Getting the post text
+
+LinkedIn answers unauthenticated requests with HTTP 999, so the text cannot be
+fetched from here. `linkedin-export-prompt.md` is a prompt to paste into Claude
+Desktop, which has a signed-in browser: it exports recent posts as JSON files in
+exactly the shape `ingest.py` expects, plus their images.
+
+Post dates come from the activity id rather than LinkedIn's relative labels:
+
+    timestamp_ms = activity_id >> 22
+
+Verified against 10 published posts, all exact.
