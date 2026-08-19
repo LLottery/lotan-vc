@@ -43,6 +43,9 @@ aside.filters a:hover{color:var(--ink)}
 @media(max-width:800px){.pgrid{grid-template-columns:1fr}}
 article.piece h1.t{font-family:var(--sans);font-size:30px;font-weight:500;line-height:1.22;letter-spacing:-.01em;margin-bottom:8px}
 article.piece img.hero-img{width:100%;border-radius:8px;margin:14px 0 22px}
+article.piece .body figure{margin:22px 0}
+article.piece .body figure img{width:100%;border-radius:8px;display:block}
+article.piece .body figcaption{font-family:var(--sans);font-size:12px;color:var(--faint);margin-top:7px}
 article.piece .body{white-space:pre-line;color:var(--ink)}
 article.piece .body p{margin-bottom:18px}
 article.piece .body p.lede{font-size:19px;color:var(--soft)}

@@ -5,7 +5,7 @@
 ```bash
 python3 tools/ingest.py post.json --dry-run   # preview
 python3 tools/ingest.py post.json             # apply
-git add -A && git commit -m "Add post: <title>" && git push
+
 ```
 
 GitHub Pages redeploys about a minute after the push.
@@ -55,6 +55,10 @@ of paragraph strings.
 5. Prepends an item to `feed.xml` and a URL to `sitemap.xml`.
 6. Copies the hero image into `img/`, named after the LinkedIn activity id to
    match the existing convention.
+7. Copies any additional visuals into `img/` as `<id>-2.jpg`, `<id>-3.jpg`, and
+   renders them as figures in the body. `after_paragraph` places one under a
+   given paragraph; the rest follow the text. Captions are optional and become
+   both the `<figcaption>` and the image's alt text.
 
 Counts are incremented rather than recomputed on purpose: the hand-maintained
 numbers exclude an externally-linked card, and a rebuild would rewrite figures
@@ -62,3 +66,34 @@ this script has no opinion about.
 
 The script refuses to overwrite an existing slug, and re-running it will not
 duplicate feed or sitemap entries.
+
+## Getting the post text
+
+LinkedIn answers unauthenticated requests with HTTP 999, so the text cannot be
+fetched from here. `linkedin-export-prompt.md` is a prompt to paste into Claude
+Desktop, which has a signed-in browser: it exports recent posts as JSON files in
+exactly the shape `ingest.py` expects, plus their images.
+
+Post dates come from the activity id rather than LinkedIn's relative labels:
+
+    timestamp_ms = activity_id >> 22
+
+Verified against 10 published posts, all exact.
+
+## Ingesting a whole export
+
+`ingest-zip.py` takes the zip the export prompt produces and runs every post in
+it through `ingest.py`, oldest first so the writing list ends up ordered:
+
+```bash
+python3 tools/ingest-zip.py linkedin-export.zip --dry-run
+python3 tools/ingest-zip.py linkedin-export.zip
+git add -A && git commit -m "Add posts" && git push
+```
+
+Asset paths in each JSON resolve against the JSON's own directory, so a flat
+bundle of posts and images works with bare filenames.
+
+Posts marked `"english_is_machine_translation": true` are held back rather than
+published, because the page template credits English versions to the author.
+Approve or rewrite the English, set the flag to false, and re-run.

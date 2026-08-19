@@ -18,6 +18,7 @@ See tools/README.md for the input format.
 """
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -63,6 +64,18 @@ def slugify(title):
 def activity_id(url):
     m = re.search(r"(?:activity[:\-])(\d+)", url or "")
     return m.group(1) if m else None
+
+
+def resolve(base, path):
+    """Resolve an asset path against the JSON file's own directory.
+
+    Falls back to the path as given, so both a bundle of files sitting next to
+    the JSON and an absolute path from elsewhere work.
+    """
+    if os.path.isabs(path):
+        return path
+    near = os.path.join(base, path)
+    return near if os.path.exists(near) else path
 
 
 def read(p):
@@ -151,7 +164,29 @@ def build_related(cards, theme, self_url):
 
 
 def build_page(p, related):
-    paras = "".join(f"<p>{esc(x)}</p>" for x in p["body_en"])
+    def figure_html(f):
+        cap = f'<figcaption>{esc(f["caption"])}</figcaption>' if f["caption"] else ""
+        return (
+            f'<figure><img src="/img/{f["name"]}" alt="{esc(f["caption"])}" '
+            f'loading="lazy">{cap}</figure>'
+        )
+
+    # A figure with after_paragraph lands under that paragraph; the rest follow
+    # the body in the order given.
+    after, trailing = {}, []
+    for f in p.get("figures") or []:
+        n = f.get("after")
+        if isinstance(n, int) and 1 <= n <= len(p["body_en"]):
+            after.setdefault(n, []).append(f)
+        else:
+            trailing.append(f)
+
+    chunks = []
+    for i, x in enumerate(p["body_en"], start=1):
+        chunks.append(f"<p>{esc(x)}</p>")
+        chunks.extend(figure_html(f) for f in after.get(i, []))
+    chunks.extend(figure_html(f) for f in trailing)
+    paras = "".join(chunks)
 
     hero = f'\n<img class="hero-img" src="/img/{p["image_name"]}" alt="">' if p.get("image_name") else ""
 
@@ -286,6 +321,7 @@ def update_sitemap(xml, p):
 
 def load_post(path):
     p = json.load(open(path, encoding="utf-8"))
+    base = os.path.dirname(os.path.abspath(path))
 
     for k in ("title", "date", "theme", "body_en"):
         if not p.get(k):
@@ -303,13 +339,41 @@ def load_post(path):
     if not p.get("excerpt"):
         p["excerpt"] = p["body_en"][0][:300]
 
+    aid = activity_id(p.get("linkedin_url", ""))
+    stem = aid or p["slug"]
+
     p["image_name"] = None
     src = p.get("image")
     if src:
-        aid = activity_id(p.get("linkedin_url", ""))
+        src = resolve(base, src)
+        if not os.path.exists(src):
+            sys.exit(f"error: image not found: {p['image']}")
         ext = os.path.splitext(src)[1] or ".jpg"
-        p["image_name"] = f"{aid or p['slug']}{ext}"
+        p["image_name"] = f"{stem}{ext}"
         p["image_src"] = src
+
+    # Additional visuals. Accepts plain paths or
+    # {file, caption, after_paragraph}; numbering continues from the hero.
+    figures = []
+    for i, f in enumerate(p.get("figures") or [], start=2):
+        if isinstance(f, str):
+            f = {"file": f}
+        raw = f.get("file")
+        if not raw:
+            continue
+        path = resolve(base, raw)
+        if not os.path.exists(path):
+            sys.exit(f"error: figure not found: {raw}")
+        ext = os.path.splitext(path)[1] or ".jpg"
+        figures.append(
+            {
+                "src": path,
+                "name": f"{stem}-{i}{ext}",
+                "caption": (f.get("caption") or "").strip(),
+                "after": f.get("after_paragraph"),
+            }
+        )
+    p["figures"] = figures
     return p
 
 
@@ -327,6 +391,18 @@ def main():
 
     if any(c["url"] == p["url"] for c in cards) or os.path.exists(page_path):
         sys.exit(f"error: {p['url']} already exists — pick a different slug or remove it first")
+
+    # The same LinkedIn post can arrive under a different title, and so a
+    # different slug, which the check above would not catch. Match on the
+    # activity id instead, which is stable.
+    aid = activity_id(p.get("linkedin_url", ""))
+    if aid:
+        for f in sorted(glob.glob(os.path.join(ROOT, "w", "*.html"))):
+            if f"activity:{aid}" in read(f):
+                sys.exit(
+                    f"error: activity {aid} is already published as "
+                    f"w/{os.path.basename(f)} — skipping"
+                )
 
     related = build_related(cards, p["theme"], p["url"])
     page = build_page(p, related)
@@ -348,7 +424,12 @@ def main():
     print(f"  filters   All ({len(new_cards)})")
     print(f"  feed.xml  {'added' if feed_ok else 'already present'}")
     print(f"  sitemap   {'added' if sm_ok else 'already present'}")
+    figs = p.get("figures") or []
     print(f"  image     {p['image_name'] or 'none'}")
+    if figs:
+        for f in figs:
+            where = f"after para {f['after']}" if isinstance(f.get("after"), int) else "end of body"
+            print(f"  figure    {f['name']}  ({where})")
 
     if a.dry_run:
         print("\ndry run — nothing written")
@@ -356,6 +437,8 @@ def main():
 
     if p.get("image_name"):
         shutil.copyfile(p["image_src"], os.path.join(ROOT, "img", p["image_name"]))
+    for f in p.get("figures") or []:
+        shutil.copyfile(f["src"], os.path.join(ROOT, "img", f["name"]))
 
     write(page_path, page)
     write(os.path.join(ROOT, "index.html"), new_index)
