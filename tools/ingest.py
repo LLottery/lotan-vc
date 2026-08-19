@@ -18,6 +18,7 @@ See tools/README.md for the input format.
 """
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -390,6 +391,18 @@ def main():
 
     if any(c["url"] == p["url"] for c in cards) or os.path.exists(page_path):
         sys.exit(f"error: {p['url']} already exists — pick a different slug or remove it first")
+
+    # The same LinkedIn post can arrive under a different title, and so a
+    # different slug, which the check above would not catch. Match on the
+    # activity id instead, which is stable.
+    aid = activity_id(p.get("linkedin_url", ""))
+    if aid:
+        for f in sorted(glob.glob(os.path.join(ROOT, "w", "*.html"))):
+            if f"activity:{aid}" in read(f):
+                sys.exit(
+                    f"error: activity {aid} is already published as "
+                    f"w/{os.path.basename(f)} — skipping"
+                )
 
     related = build_related(cards, p["theme"], p["url"])
     page = build_page(p, related)
