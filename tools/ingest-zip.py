@@ -27,10 +27,26 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("zip")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force", action="store_true",
+                    help="ingest even if verification reports errors")
     a = ap.parse_args()
 
     if not zipfile.is_zipfile(a.zip):
         sys.exit(f"error: not a zip file: {a.zip}")
+
+    # Verify before writing anything. A mis-paired post looks structurally
+    # perfect once published, so the cheap moment to catch it is now.
+    print("verifying bundle...\n")
+    v = subprocess.run(
+        [sys.executable, os.path.join(HERE, "verify-bundle.py"), a.zip],
+        capture_output=True, text=True,
+    )
+    sys.stdout.write(v.stdout)
+    if v.returncode and not a.force:
+        sys.exit("\nverification failed — fix the bundle, or re-run with --force")
+    if v.returncode:
+        print("\nverification failed, continuing because --force was given\n")
+    print("-" * 60 + "\n")
 
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(a.zip) as z:

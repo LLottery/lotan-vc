@@ -97,3 +97,31 @@ bundle of posts and images works with bare filenames.
 Posts marked `"english_is_machine_translation": true` are held back rather than
 published, because the page template credits English versions to the author.
 Approve or rewrite the English, set the flag to false, and re-run.
+
+## Verifying a bundle before publishing
+
+`ingest-zip.py` runs `verify-bundle.py` first and refuses to publish a bundle
+that reports errors. It can also be run alone:
+
+```bash
+python3 tools/verify-bundle.py linkedin-export.zip
+python3 tools/verify-bundle.py linkedin-export.zip --review
+```
+
+Errors block publishing: a date that disagrees with its activity id, a missing
+image, an activity id repeated inside the bundle, an image used by two posts, a
+title collision, or a `text_witness` that does not match the body.
+
+That last one is the important one. A mis-paired post — one post's text carrying
+another post's activity id — is structurally perfect once published, because the
+date, image name and provenance link all derive from the same wrong id. The
+witness is captured beside the id while collecting, so a shuffle during assembly
+shows up as a mismatch.
+
+Warnings do not block: an activity id already published, a machine translation,
+a post with no image, an unfamiliar theme. Coverage gaps over 14 days are
+reported too, counting posts already on the site, since the export can silently
+miss posts.
+
+`--review` prints a manifest of date, title, image and opening line, for the one
+check that cannot be automated: opening each image and confirming it belongs.

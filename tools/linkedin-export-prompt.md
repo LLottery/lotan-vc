@@ -43,6 +43,13 @@ failure and re-sweep before reporting it as real.
 Include only original posts I authored. Skip reposts, shares of other people's
 posts, comments, and reactions.
 
+As you record each activity id, capture the first 60 characters of that post's
+visible text in the same step, and carry the two together from then on. This is
+the `text_witness`. Do not reconstruct it later from the assembled JSON — its
+whole purpose is to be captured beside the id, so that if text and ids are ever
+shuffled during assembly the mismatch is detectable. A post has already gone out
+with the wrong image and wrong link because that check did not exist.
+
 **2. Get each post's exact date from its ID**
 
 Every post URL contains `urn:li:activity:<id>`. The ID encodes its publish time:
@@ -66,6 +73,7 @@ posts, all matching.
       "body_en":      "Paragraph.\n\nParagraph.",
       "body_he":      "",
       "image":        "<id>.jpg",
+      "text_witness": "First 60 characters of the post, copied at collection time",
       "language":     "en",
       "english_is_machine_translation": false
     }
@@ -80,7 +88,9 @@ Themes — pick the closest, or propose a new one and say so:
 
 **4. Language rules — important**
 
-Copy the post text verbatim. Do not rewrite, tighten, or improve it.
+Copy the post text verbatim. Do not rewrite, tighten, or improve it. The
+`text_witness` must be the opening of the post exactly as it appeared, in the
+post's own language, so it can be matched against the body.
 
 - Post in English → put it in `body_en`, leave `body_he` empty, `"language": "en"`.
 - Post in Hebrew → put the Hebrew verbatim in `body_he`, set `"language": "he"`,
