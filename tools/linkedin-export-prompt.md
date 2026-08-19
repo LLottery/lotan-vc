@@ -16,11 +16,29 @@ I am signed in to LinkedIn in this browser. These are my own posts on my own
 account. Work in a folder called `linkedin-export` in my home directory; create
 it if it does not exist.
 
+**0. Before you start**
+
+State which machine each artifact lands on. If the browser and the code sandbox
+are different machines, say so and pick one destination — do not assume "my home
+directory" resolves anywhere.
+
+Downloads triggered from injected JavaScript are silently discarded. Trigger
+them from a real click on an injected button. Before doing any real work,
+download one small test file and have me confirm it landed. Do not build the
+deliverable until that passes, and never report a file as delivered without
+confirming it exists.
+
 **1. Collect the posts**
 
 Open https://www.linkedin.com/in/lotanlevkowitz/recent-activity/all/ and scroll
 until you reach posts older than the cutoff date. Click every "…see more" so no
 text stays truncated.
+
+The feed evicts posts from the DOM as you scroll, so reading it once at the end
+loses most of them. Accumulate activity ids into a persistent set on every
+scroll increment. Continue until you have a contiguous run of posts below the
+cutoff. Treat any gap longer than my normal posting cadence as a collection
+failure and re-sweep before reporting it as real.
 
 Include only original posts I authored. Skip reposts, shares of other people's
 posts, comments, and reactions.
@@ -77,8 +95,9 @@ approves the English himself. Never set the flag to false for text you produced.
 
 Many posts carry more than one visual. Save them all into `linkedin-export/`,
 named `<activity_id>.jpg`, `<activity_id>-2.jpg`, `<activity_id>-3.jpg`, and so
-on, in the order they appear in the post. Download at the largest resolution
-LinkedIn serves, not the feed thumbnail.
+on, in the order they appear in the post. Download the largest variant the page
+actually serves, not the feed thumbnail — larger variants are signature-locked
+and will 403. Report the actual pixel dimensions of what you saved.
 
 Cover each of these:
 
@@ -117,8 +136,10 @@ Put every JSON file and every image directly in `linkedin-export/`, flat, with
 no subfolders. Asset paths in the JSON are bare filenames because the files sit
 beside it.
 
-Then zip the whole folder to `linkedin-export.zip` in my home directory, and
-tell me where it is so I can upload it.
+Deliver one archive, not loose files, and not text and images separately. Zip
+the whole folder to `linkedin-export.zip` and tell me exactly where it is so I
+can upload it. Confirm the zip exists and report its size before saying you are
+done.
 
 **7. Report back**
 
