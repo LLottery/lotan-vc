@@ -16,6 +16,7 @@ Usage:
 
 import argparse
 import collections
+import hashlib
 import datetime
 import glob
 import json
@@ -140,6 +141,18 @@ def main():
                 if d["date"] != want:
                     errors.append(f"{name}: date {d['date']} but activity id says {want}")
                 dated.append((d["date"], name, d.get("title", "")))
+
+            # integrity hash written by the exporter at collection time; the
+            # editorial pass must leave body text byte-identical
+            h = d.get("body_sha256")
+            if h:
+                body = d.get("body_he") if (d.get("language") == "he") else d.get("body_en")
+                got = hashlib.sha256((body or "").encode("utf-8")).hexdigest()
+                if got != h:
+                    errors.append(
+                        f"{name}: body_sha256 mismatch — the body text was modified "
+                        f"after export (editorial passes must not touch body fields)"
+                    )
 
             # the witness is captured beside the id at collection time, so a
             # shuffle between text and id shows up here
