@@ -128,8 +128,9 @@ check that cannot be automated: opening each image and confirming it belongs.
 
 ## The three-stage flow
 
-The browser exporter (`linkedin-export.js`, pasted into DevTools on the activity
-page) harvests each post from the DOM element that carries its activity id, so
+The browser exporter (`tools/linkedin-export.js`, pasted into DevTools on the
+activity page — vendored here with `tools/editorial-pass-prompt.md` so the whole
+pipeline is versioned in one place) harvests each post from the DOM element that carries its activity id, so
 text, images and id come from the same element and cannot be shuffled. It emits
 a flat bundle plus `_index.json`, with `title`, `theme` and `excerpt`
 auto-generated and `needs_editorial: true`.
