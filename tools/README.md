@@ -125,3 +125,27 @@ miss posts.
 
 `--review` prints a manifest of date, title, image and opening line, for the one
 check that cannot be automated: opening each image and confirming it belongs.
+
+## The three-stage flow
+
+The browser exporter (`linkedin-export.js`, pasted into DevTools on the activity
+page) harvests each post from the DOM element that carries its activity id, so
+text, images and id come from the same element and cannot be shuffled. It emits
+a flat bundle plus `_index.json`, with `title`, `theme` and `excerpt`
+auto-generated and `needs_editorial: true`.
+
+    1. export     browser script  -> linkedin-export.zip
+    2. editorial  no browser      -> title, theme, excerpt written; flag cleared
+    3. verify     verify-bundle.py -> blocks on errors
+    4. ingest     ingest-zip.py
+
+`verify-bundle.py` treats `needs_editorial: true` as an error, so a raw bundle
+cannot be published before stage 2. It reads `_index.json` when present and
+reports the exporter's own warnings, skips and gaps alongside its own checks.
+
+`body_en` is empty by design for Hebrew posts and is not treated as missing. The
+English is written or approved by the author; `ingest-zip.py` holds those posts
+rather than publishing them.
+
+Carousel and document posts are a known gap: the exporter saves no slides and
+warns about each one. Those need their visuals added by hand.
