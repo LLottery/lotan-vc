@@ -1,0 +1,35 @@
+# Lotan Levkowitz — lotan.vc
+
+> Personal site of Lotan Levkowitz, co-founder and Managing Partner at Grove
+> Ventures (Tel Aviv). Essays and field notes on enterprise AI, data moats,
+> service-as-software, infrastructure software, and company formation at the
+> earliest stage. He works with founders before there is an idea, often
+> incubating companies from the first conversation.
+
+Everything here was first published on LinkedIn under his name; what holds up
+is kept in full, and recurring arguments are expanded into essays. Each page
+carries its publication date and a link to the original post.
+
+## Start here (essays)
+
+- [Show Me the Flywheel](https://lotan.vc/essays/show-me-the-flywheel.html): a data moat is not proprietary data, it is proprietary data that compounds
+- [The AI Conversation We're Not Having](https://lotan.vc/essays/the-ai-conversation-were-not-having.html): the edge belongs to founders building where it is still hard
+- [Services Are the Next Software](https://lotan.vc/essays/service-as-software.html): turning human-delivered services into software, and why the barrier is operational
+- [The Enterprise-AI Startup Playbook](https://lotan.vc/essays/the-enterprise-ai-startup-playbook.html): a decade of lessons from partnering with enterprise-AI founders
+- [Mapping the Israeli SDLC Landscape](https://lotan.vc/essays/mapping-the-israeli-sdlc-landscape.html)
+
+## Recent field notes
+
+- [Your Pricing Unit Decides Your Margin](https://lotan.vc/w/your-pricing-unit-decides-your-margin.html): per token, per insight, per outcome — the ladder that decides who keeps falling model costs
+- [The FDE Paradox](https://lotan.vc/w/the-fde-paradox.html): the more AI advances, the more people its deployment requires
+- [Stripe Is Buying the Door to AI](https://lotan.vc/w/stripe-is-buying-the-door-to-ai.html)
+- Full index: https://lotan.vc/ · RSS: https://lotan.vc/feed.xml · Sitemap: https://lotan.vc/sitemap.xml
+
+## About
+
+Lotan Levkowitz began working with Dov Moran in his twenties and co-founded
+Grove Ventures in 2017. He invests in enterprise AI, infrastructure software,
+services-as-software, physical AI, and healthcare AI, usually at pre-seed and
+seed, and has incubated multiple companies alongside their founding teams.
+
+Contact: lotan@grovevc.com · LinkedIn: https://www.linkedin.com/in/lotanlevkowitz/ · Fund: https://www.grovevc.com
