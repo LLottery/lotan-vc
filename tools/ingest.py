@@ -197,6 +197,28 @@ def build_page(p, related):
             f'<div>{esc(p["body_he"])}</div></details>'
         )
 
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": p["title"],
+        "url": f"https://lotan.vc{p['url']}",
+        "mainEntityOfPage": f"https://lotan.vc{p['url']}",
+        "datePublished": p["date"],
+        "description": p["excerpt"],
+        "inLanguage": "en",
+        "author": {
+            "@type": "Person",
+            "name": "Lotan Levkowitz",
+            "url": "https://lotan.vc/",
+            "jobTitle": "Co-founder and Managing Partner",
+            "worksFor": {"@type": "Organization", "name": "Grove Ventures", "url": "https://www.grovevc.com"},
+            "sameAs": ["https://www.linkedin.com/in/lotanlevkowitz/", "https://www.grovevc.com"],
+        },
+    }
+    if p.get("image_name"):
+        ld["image"] = f"https://lotan.vc/img/{p['image_name']}"
+    jsonld = '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False) + "</script>"
+
     prov_tail = " Originally written in Hebrew; English version by the author." if p.get("body_he") else ""
     if p.get("linkedin_url"):
         prov = (
@@ -219,6 +241,7 @@ def build_page(p, related):
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="alternate" type="application/rss+xml" title="Lotan Levkowitz" href="https://lotan.vc/feed.xml">
 <script data-goatcounter="https://lotanvc2.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+{jsonld}
 </head>
 <body>
 <div class="wrap">
