@@ -70,11 +70,20 @@ def load(bundle):
 
     posts = []
     for f in sorted(glob.glob(os.path.join(root, "**", "*.json"), recursive=True)):
+        if os.path.basename(f) == "_index.json":
+            continue
         try:
             posts.append((f, json.load(open(f, encoding="utf-8"))))
         except Exception as e:
             posts.append((f, {"__error__": str(e)}))
-    return tmp, root, posts
+    manifest = None
+    hits = glob.glob(os.path.join(root, "**", "_index.json"), recursive=True)
+    if hits:
+        try:
+            manifest = json.load(open(hits[0], encoding="utf-8"))
+        except Exception:
+            manifest = None
+    return tmp, root, posts, manifest
 
 
 def main():
@@ -83,7 +92,7 @@ def main():
     ap.add_argument("--review", action="store_true", help="print a manifest for visual checking")
     a = ap.parse_args()
 
-    tmp, root, posts = load(a.bundle)
+    tmp, root, posts, manifest = load(a.bundle)
     if not posts:
         sys.exit("error: no .json posts found")
 
@@ -98,7 +107,20 @@ def main():
             errors.append(f"{name}: unreadable JSON — {d['__error__']}")
             continue
 
-        for k in ("title", "date", "theme", "body_en", "linkedin_url"):
+        pending = bool(d.get("needs_editorial"))
+        if pending:
+            errors.append(f"{name}: needs_editorial is still true — run the editorial pass first")
+
+        required = ["title", "date", "linkedin_url"]
+        if not pending:
+            required.append("theme")
+        # body_en is empty by design for Hebrew posts: the English is written or
+        # approved by the author, never auto-filled.
+        if (d.get("language") or "en") != "he":
+            required.append("body_en")
+        elif not d.get("body_he"):
+            errors.append(f"{name}: Hebrew post with no body_he")
+        for k in required:
             if not d.get(k):
                 errors.append(f"{name}: missing required field '{k}'")
 
@@ -129,7 +151,7 @@ def main():
                         f"{name}: text_witness does not match the body — "
                         f"text and activity id may belong to different posts"
                     )
-            else:
+            elif manifest is None:
                 warnings.append(f"{name}: no text_witness, pairing cannot be checked mechanically")
 
         if d.get("theme") and d["theme"] not in THEMES:
@@ -188,6 +210,26 @@ def main():
         print(f"COVERAGE — {len(gaps)} gap(s) over {MAX_GAP_DAYS} days, counting posts already on the site")
         for g, x, y in sorted(gaps, reverse=True)[:15]:
             print(f"  {g:>4} days between {x} and {y}")
+        print()
+
+    if manifest:
+        mw = manifest.get("warnings") or []
+        sk = manifest.get("skipped") or []
+        mg = manifest.get("suspicious_gaps") or []
+        print("EXPORTER MANIFEST")
+        print(f"  exported {manifest.get('total_exported','?')} post(s), cutoff {manifest.get('cutoff','?')}")
+        if mw:
+            print(f"  warnings from the exporter ({len(mw)}):")
+            for w in mw[:20]:
+                print("    !", w)
+        if sk:
+            print(f"  skipped by the exporter ({len(sk)}):")
+            for x in sk[:12]:
+                print(f"    - {x.get('date','?')} {x.get('id','?')}: {x.get('reason','?')}")
+        if mg:
+            print(f"  gaps the exporter flagged ({len(mg)}):")
+            for g in mg[:12]:
+                print("    ", g)
         print()
 
     if a.review:
