@@ -1,7 +1,7 @@
 # Lotan Levkowitz — lotan.vc
 
 > Personal site of Lotan Levkowitz, co-founder and Managing Partner at Grove
-> Ventures (Tel Aviv). Essays and field notes on enterprise AI, data moats,
+> Ventures (Tel Aviv), where he leads first rounds. Essays and field notes on enterprise AI, data moats,
 > service-as-software, infrastructure software, and company formation at the
 > earliest stage. He works with founders before there is an idea, often
 > incubating companies from the first conversation.
