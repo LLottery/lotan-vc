@@ -155,16 +155,27 @@ def main():
                     )
 
             # the witness is captured beside the id at collection time, so a
-            # shuffle between text and id shows up here
+            # shuffle between text and id shows up here. When body_sha256 is
+            # present the hash is strictly stronger, so the witness is not
+            # re-checked; the newer "N chars | head ... tail" format is checked
+            # against the whitespace-flattened body.
             w = (d.get("text_witness") or "").strip()
-            if w:
+            if w and not h:
                 body = (d.get("body_he") or d.get("body_en") or "").strip()
-                if not body.startswith(w[:40]):
+                if " chars | " in w:
+                    flat = re.sub(r"\s+", " ", body).strip()
+                    head = w.split(" chars | ", 1)[1].split(" ... ")[0]
+                    if not flat.startswith(head):
+                        errors.append(
+                            f"{name}: text_witness does not match the body — "
+                            f"text and activity id may belong to different posts"
+                        )
+                elif not body.startswith(w[:40]):
                     errors.append(
                         f"{name}: text_witness does not match the body — "
                         f"text and activity id may belong to different posts"
                     )
-            elif manifest is None:
+            elif not w and not h and manifest is None:
                 warnings.append(f"{name}: no text_witness, pairing cannot be checked mechanically")
 
         if d.get("theme") and d["theme"] not in THEMES:
