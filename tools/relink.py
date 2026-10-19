@@ -21,6 +21,7 @@ from ingest import (  # noqa: E402
     ROOT, parse_index, read, write, esc, build_card, update_filters,
     update_feed, update_sitemap,
 )
+import seo  # noqa: E402
 
 
 def main():
@@ -84,6 +85,8 @@ def main():
     write(os.path.join(ROOT, "index.html"), new_index)
     write(os.path.join(ROOT, "feed.xml"), feed)
     write(os.path.join(ROOT, "sitemap.xml"), sm)
+    seo.rebuild_indexes()
+    seo.rebuild_sitemap()
     print(f"\nlinked {url}")
 
 

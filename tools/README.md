@@ -45,17 +45,25 @@ of paragraph strings.
 ## What it does
 
 1. Writes `w/<slug>.html` from the site template — head, CSP, canonical,
-   GoatCounter, hero image, Hebrew `<details>`, provenance, read-depth script.
+   Open Graph and Twitter cards, JSON-LD author, GoatCounter, hero image,
+   Hebrew `<details>`, provenance, read-depth script. The meta description is
+   the excerpt cut on a word boundary at 155 characters, with an ellipsis when
+   it is cut. A post whose slug or title matches an essay gets that essay as
+   its canonical URL and a line pointing at it.
 2. Builds the "Keep reading" sidebar: up to three most recent same-theme posts
    plus a topical essay.
 3. Inserts the card into `#pl` in `index.html` in reverse-chronological order,
    leaving the interleaved ESSAY cards where they are.
 4. Increments the "All" and per-theme counts in the filter sidebar, adding a new
    theme link if the theme is new.
-5. Prepends an item to `feed.xml` and a URL to `sitemap.xml`.
-6. Copies the hero image into `img/`, named after the LinkedIn activity id to
+5. Prepends an item to `feed.xml` and a URL, with `<lastmod>`, to `sitemap.xml`.
+   Home and the index pages use the file's last commit date; posts and essays
+   use their publish date.
+6. Rebuilds `essays/index.html` and `w/index.html` (newest first) from the
+   writing list.
+7. Copies the hero image into `img/`, named after the LinkedIn activity id to
    match the existing convention.
-7. Copies any additional visuals into `img/` as `<id>-2.jpg`, `<id>-3.jpg`, and
+8. Copies any additional visuals into `img/` as `<id>-2.jpg`, `<id>-3.jpg`, and
    renders them as figures in the body. `after_paragraph` places one under a
    given paragraph; the rest follow the text. Captions are optional and become
    both the `<figcaption>` and the image's alt text.
@@ -150,3 +158,11 @@ rather than publishing them.
 
 Carousel and document posts are a known gap: the exporter saves no slides and
 warns about each one. Those need their visuals added by hand.
+
+## IndexNow
+
+`tools/indexnow.py` runs at the end of the publish workflow, after `main` is
+mirrored onto `gh-pages`. It POSTs the HTML URLs changed in that push to
+`https://api.indexnow.org/indexnow`. The key file is `<key>.txt` at the site
+root. The step retries while Pages is still deploying and is non-fatal if
+IndexNow never answers.

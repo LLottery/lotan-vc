@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ingest import ROOT, parse_index, read, write, esc, activity_id  # noqa: E402
+import seo  # noqa: E402
 
 
 def main():
@@ -61,14 +62,14 @@ def main():
     feed = read(os.path.join(ROOT, "feed.xml"))
     new_feed = re.sub(r"<item>(?:(?!</item>).)*?" + re.escape(url) + r".*?</item>\n?", "", feed, flags=re.S)
     sm = read(os.path.join(ROOT, "sitemap.xml"))
-    new_sm = re.sub(r"<url><loc>https://lotan\.vc" + re.escape(url) + r"</loc></url>\n?", "", sm)
+    had_sm = f"<loc>https://lotan.vc{url}</loc>" in sm
 
     images = sorted(glob.glob(os.path.join(ROOT, "img", f"{aid}*"))) if aid else []
 
     print(f"  page      w/{slug}.html")
     print(f"  index     card removed ({len(cards)} -> {len(keep)})" + (f"  [{theme}]" if theme else ""))
     print(f"  feed.xml  {'entry removed' if new_feed != feed else 'no entry'}")
-    print(f"  sitemap   {'entry removed' if new_sm != sm else 'no entry'}")
+    print(f"  sitemap   {'entry removed' if had_sm else 'no entry'}")
     for i in images:
         print(f"  image     {os.path.basename(i)}")
 
@@ -81,7 +82,8 @@ def main():
         os.remove(i)
     write(os.path.join(ROOT, "index.html"), new_index)
     write(os.path.join(ROOT, "feed.xml"), new_feed)
-    write(os.path.join(ROOT, "sitemap.xml"), new_sm)
+    seo.rebuild_indexes()
+    seo.rebuild_sitemap()
     print(f"\nremoved {url}")
 
 

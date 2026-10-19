@@ -7,8 +7,9 @@ Takes one JSON file describing a post and performs every mechanical step:
   2. inserts the card into the writing list in index.html (reverse-chronological)
   3. updates the theme filter counts
   4. adds an item to feed.xml
-  5. adds a URL to sitemap.xml
-  6. copies the hero image into img/
+  5. adds a URL with lastmod to sitemap.xml
+  6. rebuilds the /essays/ and /w/ index pages
+  7. copies the hero image into img/
 
 Usage:
     python3 tools/ingest.py post.json            # apply
@@ -25,6 +26,8 @@ import re
 import shutil
 import sys
 import unicodedata
+
+import seo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -197,6 +200,21 @@ def build_page(p, related):
             f'<div>{esc(p["body_he"])}</div></details>'
         )
 
+    excerpt = re.sub(r"\s+", " ", p["excerpt"]).strip()
+    description = seo.meta_description(excerpt)
+    essay = seo.matching_essay(p["slug"], p["title"])
+    canonical = f"https://lotan.vc{essay['url']}" if essay else f"https://lotan.vc{p['url']}"
+    image = f"https://lotan.vc/img/{p['image_name']}" if p.get("image_name") else seo.PORTRAIT
+    social = seo.social_tags(
+        title=f"{p['title']} — Lotan Levkowitz",
+        description=description,
+        url=canonical,
+        image=image,
+        kind="article",
+        published=p["date"],
+    )
+    expansion = ("\n" + seo.expansion_line(essay)) if essay else ""
+
     ld = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -204,16 +222,9 @@ def build_page(p, related):
         "url": f"https://lotan.vc{p['url']}",
         "mainEntityOfPage": f"https://lotan.vc{p['url']}",
         "datePublished": p["date"],
-        "description": p["excerpt"],
+        "description": excerpt,
         "inLanguage": "en",
-        "author": {
-            "@type": "Person",
-            "name": "Lotan Levkowitz",
-            "url": "https://lotan.vc/",
-            "jobTitle": "Co-founder and Managing Partner",
-            "worksFor": {"@type": "Organization", "name": "Grove Ventures", "url": "https://www.grovevc.com"},
-            "sameAs": ["https://www.linkedin.com/in/lotanlevkowitz/", "https://www.grovevc.com"],
-        },
+        "author": seo.author_person(),
     }
     if p.get("image_name"):
         ld["image"] = f"https://lotan.vc/img/{p['image_name']}"
@@ -234,8 +245,9 @@ def build_page(p, related):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(p["title"])} &mdash; Lotan Levkowitz</title>
-<meta name="description" content="{esc(p["excerpt"][:155])}">
-<link rel="canonical" href="https://lotan.vc{p["url"]}">
+<meta name="description" content="{esc(description)}">
+<link rel="canonical" href="{canonical}">
+{social}
 <link rel="stylesheet" href="/style.css">
 <meta http-equiv="Content-Security-Policy" content="{CSP}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -253,7 +265,7 @@ def build_page(p, related):
 <article class="piece">
 <a class="back" href="/#writing">&larr; All writing</a>
 <div class="meta"><span class="tag">{esc(p["theme"])}</span> {p["date"]}</div>
-<h1 class="t">{esc(p["title"])}</h1>{hero}
+<h1 class="t">{esc(p["title"])}</h1>{expansion}{hero}
 <div class="body">{paras}</div>{hebrew}{prov}
 </article>
 {related}
@@ -332,11 +344,16 @@ def update_feed(xml, p):
 
 
 def update_sitemap(xml, p):
-    url = f"<url><loc>https://lotan.vc{p['url']}</loc></url>"
-    if url in xml:
+    """Insert a post URL with its publish date. Rebuild keeps lastmod fresh."""
+    loc = f"https://lotan.vc{p['url']}"
+    if f"<loc>{loc}</loc>" in xml:
         return xml, False
-    i = xml.index("<url><loc>https://lotan.vc/w/")
-    return xml[:i] + url + "\n" + xml[i:], True
+    entry = f"<url><loc>{loc}</loc><lastmod>{p['date']}</lastmod></url>\n"
+    # After the /w/ index, ahead of the first archived post.
+    m = re.search(r"<url><loc>https://lotan\.vc/w/[^<]+\.html</loc>", xml)
+    if not m:
+        return xml.replace("</urlset>", entry + "</urlset>"), True
+    return xml[: m.start()] + entry + xml[m.start() :], True
 
 
 # --------------------------------------------------------------------------
@@ -467,6 +484,10 @@ def main():
     write(os.path.join(ROOT, "index.html"), new_index)
     write(os.path.join(ROOT, "feed.xml"), feed)
     write(os.path.join(ROOT, "sitemap.xml"), sm)
+    # Indexes and lastmod are derived from the pages just written.
+    seo.sync_essay_expansions()
+    seo.rebuild_indexes()
+    seo.rebuild_sitemap()
     print(f"\ndone → https://lotan.vc{p['url']}")
 
 
