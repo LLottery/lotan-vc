@@ -30,3 +30,13 @@ jobs:
 
       - name: Mirror main onto gh-pages
         run: git push --force origin HEAD:gh-pages
+
+      # Pages publishes from gh-pages. Ping after that push. The script retries
+      # while the key file is still deploying. A failure here does not fail
+      # the publish.
+      - name: Ping IndexNow
+        continue-on-error: true
+        env:
+          INDEXNOW_BEFORE: ${{ github.event.before }}
+          INDEXNOW_SHA: ${{ github.sha }}
+        run: python3 tools/indexnow.py
