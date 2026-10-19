@@ -57,6 +57,9 @@ def main():
             z.extractall(tmp)
 
         posts = sorted(glob.glob(os.path.join(tmp, "**", "*.json"), recursive=True))
+        # The exporter manifest is not a post. verify-bundle.py already skips it;
+        # ingesting it fails on missing title/date and makes a good bundle exit 1.
+        posts = [p for p in posts if os.path.basename(p) != "_index.json"]
         if not posts:
             sys.exit("error: no .json posts found in the zip")
 
