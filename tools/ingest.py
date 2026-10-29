@@ -259,7 +259,7 @@ def build_page(p, related):
 <div class="wrap">
 <header class="site"><div class="bar">
 <h1><a href="/">Lotan Levkowitz</a></h1>
-<nav><a href="/#writing">Writing</a><a href="/#about">About</a><a href="/#connect">Connect</a></nav>
+<nav><a href="/#writing">Writing</a><a href="/w/">Field notes</a><a href="/#about">About</a><a href="/#connect">Connect</a></nav>
 </div></header>
 <div class="pgrid">
 <article class="piece">
